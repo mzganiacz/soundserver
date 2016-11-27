@@ -14,11 +14,11 @@ import static org.mockito.ArgumentMatchers.eq;
 /**
  * Created by Dynamo on 25.11.2016.
  */
-public class ClientConnectionTest {
+public class ServerConnectionTest {
 
     @Rule
     public ExpectedException thrown = ExpectedException.none();
-    private ClientConnection tested;
+    private ServerConnection tested;
     private Socket socketMock;
     private OutputStream osMock;
 
@@ -27,7 +27,7 @@ public class ClientConnectionTest {
         //given
         thrown.expect(IllegalArgumentException.class);
         //when
-        tested = new ClientConnection(new Socket());
+        tested = new ServerConnection(new Socket());
 
         //then  exception
     }
@@ -36,7 +36,7 @@ public class ClientConnectionTest {
     public void shouldSendPacketOverSocket() throws IOException {
         //given
         mockSocket();
-        tested = new ClientConnection(socketMock);
+        tested = new ServerConnection(socketMock);
         //when
         byte[] packet = {'0', '1', '2'};
         tested.sendPacket(packet);

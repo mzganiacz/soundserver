@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.client;
 
+import com.zganiacz.axwave.server.ByteStreamUtilities;
 import org.apache.commons.io.IOUtils;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Before;
@@ -12,7 +13,10 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
+import java.util.function.LongSupplier;
 
+import static com.zganiacz.axwave.server.ClientConnection.HEADER_LENGTH;
+import static com.zganiacz.axwave.server.ClientConnection.MAGIC_HEADER_PREFIX;
 import static org.junit.Assert.*;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
@@ -24,12 +28,12 @@ public class AudioPacketBuilderTest {
 
     private static final short TWO_BYTES_OF_DATA = 2;
     private static final short BYTE_OF_DATA = 1;
-    private final TimestampProvider timestampProvider = mock(TimestampProvider.class);
+    private final LongSupplier timestampProvider = mock(LongSupplier.class);
     private AudioPacketBuilder tested;
 
     @Before
     public void before() {
-        when(timestampProvider.getTimestamp()).thenReturn(System.currentTimeMillis());
+        when(timestampProvider.getAsLong()).thenReturn(System.currentTimeMillis());
     }
 
     @Test
@@ -43,7 +47,7 @@ public class AudioPacketBuilderTest {
 
         //then
         byte[] expecteds = getExpectedHeader(TWO_BYTES_OF_DATA);
-        assertArrayEquals(expecteds, ArrayUtils.subarray(bytes, 0, AudioPacketBuilder.HEADER_LENGTH));
+        assertArrayEquals(expecteds, ArrayUtils.subarray(bytes, 0, HEADER_LENGTH));
 
     }
 
@@ -138,9 +142,9 @@ public class AudioPacketBuilderTest {
     }
 
     private byte[] getExpectedHeader(short dataSize) {
-        byte[] expecteds = ArrayUtils.addAll(AudioPacketBuilder.MAGIC_HEADER_PREFIX, ByteConversionUtils.toBytes((short) (10 + dataSize)));
-        expecteds = ArrayUtils.addAll(expecteds, ByteConversionUtils.toBytes(timestampProvider.getTimestamp()));
-        expecteds = ArrayUtils.addAll(expecteds, ByteConversionUtils.toBytes(getCode()));
+        byte[] expecteds = ArrayUtils.addAll(MAGIC_HEADER_PREFIX, ByteStreamUtilities.toBytes((short) (10 + dataSize)));
+        expecteds = ArrayUtils.addAll(expecteds, ByteStreamUtilities.toBytes(timestampProvider.getAsLong()));
+        expecteds = ArrayUtils.addAll(expecteds, ByteStreamUtilities.toBytes(getCode()));
         return expecteds;
     }
 }

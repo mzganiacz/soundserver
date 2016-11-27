@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.client;
 
+import com.zganiacz.axwave.server.AudioFormats;
 import javafx.util.Pair;
 
 import javax.sound.sampled.*;
@@ -70,10 +71,9 @@ public class Client {
             int secondSize = secondSize(format.getAudioFormat());
             int dataSize = secondSize * packetLengthInSeconds;
             int repeatSize = secondSize * calcRepeatLengthInSeconds(interval, packetLengthInSeconds);
-            AudioPacketBuilder audioPacketBuilder = new AudioPacketBuilder(dataSize, repeatSize, format.getCode(), new TimestampProvider() {
-            });
+            AudioPacketBuilder audioPacketBuilder = new AudioPacketBuilder(dataSize, repeatSize, format.getCode(), () -> System.currentTimeMillis());
 
-            ClientConnection cc = new ClientConnection(socket);
+            ServerConnection cc = new ServerConnection(socket);
 
             //Pump from in input to socket output
             while (true) {

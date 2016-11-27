@@ -1,4 +1,4 @@
-package com.zganiacz.axwave.client;
+package com.zganiacz.axwave.server;
 
 import javax.sound.sampled.AudioFormat;
 import java.util.LinkedHashMap;

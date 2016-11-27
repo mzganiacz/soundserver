@@ -9,17 +9,17 @@ import java.util.logging.Logger;
 /**
  * Created by Dynamo on 24.11.2016.
  */
-public class ClientConnection {
+public class ServerConnection {
 
 
-    private static Logger LOGGER = Logger.getLogger(ClientConnection.class.getCanonicalName());
+    private static Logger LOGGER = Logger.getLogger(ServerConnection.class.getCanonicalName());
     private final Socket socket;
     //the queue is bounded - so in case the client isn't able to drain the queue, and it will fill up,
     //the thread that writes to it will block, and in consequence it won't read the audio stream and the buffer in data
     //line will overflow. This will protect us from OOM, but will result in clicks in sound.
     private final BlockingQueue<byte[]> queue = new ArrayBlockingQueue<byte[]>(100);
 
-    public ClientConnection(Socket socket) {
+    public ServerConnection(Socket socket) {
         if (!socket.isConnected()) {
             throw new IllegalArgumentException("Connected socket is expected");
         }

@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.client;
 
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -16,6 +17,7 @@ public class ClientIntegrationTest {
     private Client tested;
 
     @Test
+    @Ignore
     public void smokeTest() throws IOException, InterruptedException {
         //given
         tested = new Client(1, 1, null, 1984);
