@@ -1,4 +1,4 @@
-package com.zganiacz.axwave.server;
+package com.zganiacz.axwave.client;
 
 /**
  * Created by Dynamo on 24.11.2016.
@@ -12,6 +12,7 @@ public class ServerIntegrationTest {
         tested = new Server(2, 4);
 
         //when
+
 
         //then
     }

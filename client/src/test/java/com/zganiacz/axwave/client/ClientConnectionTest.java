@@ -1,4 +1,4 @@
-package com.zganiacz.axwave.server;
+package com.zganiacz.axwave.client;
 
 import org.junit.Rule;
 import org.junit.Test;
@@ -10,8 +10,6 @@ import java.io.OutputStream;
 import java.net.Socket;
 
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Dynamo on 25.11.2016.
@@ -44,14 +42,14 @@ public class ClientConnectionTest {
         tested.sendPacket(packet);
 
         //then
-        verify(osMock).write(eq(packet));
+        Mockito.verify(osMock).write(eq(packet));
     }
 
     private void mockSocket() throws IOException {
         socketMock = Mockito.mock(Socket.class);
         osMock = Mockito.mock(OutputStream.class);
-        when(socketMock.isConnected()).thenReturn(true);
-        when(socketMock.getOutputStream()).thenReturn(osMock);
+        Mockito.when(socketMock.isConnected()).thenReturn(true);
+        Mockito.when(socketMock.getOutputStream()).thenReturn(osMock);
     }
 
 }

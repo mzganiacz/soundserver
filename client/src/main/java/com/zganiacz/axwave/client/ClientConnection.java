@@ -1,4 +1,4 @@
-package com.zganiacz.axwave.server;
+package com.zganiacz.axwave.client;
 
 import java.io.IOException;
 import java.net.Socket;
