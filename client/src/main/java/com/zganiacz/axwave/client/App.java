@@ -10,20 +10,18 @@ import java.util.logging.Logger;
  */
 public class App {
 
-    private static Logger LOGGER = Logger.getLogger(Server.class.getCanonicalName());
+    private static Logger LOGGER = Logger.getLogger(Client.class.getCanonicalName());
 
     public static void main(String[] args) {
         Options options = new Options();
 
-        Option k = new Option("k", true, "interval, default=2");
-        k.setRequired(false);
-        k.setType(Integer.class);
-        options.addOption(k);
+        options.addOption(buildOption("k", "interval, default=2", Integer.class));
 
-        Option n = new Option("n", true, "packetLengthInSeconds, default=4");
-        n.setRequired(false);
-        n.setType(Integer.class);
-        options.addOption(n);
+        options.addOption(buildOption("n", "packetLengthInSeconds, default=4", Integer.class));
+
+        options.addOption(buildOption("host", "host, default=localhost", String.class));
+
+        options.addOption(buildOption("port", "port, default=1984", Integer.class));
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -33,7 +31,7 @@ public class App {
             cmd = parser.parse(options, args);
         } catch (ParseException e) {
             System.out.println(e.getMessage());
-            formatter.printHelp("Axwave Server", options);
+            formatter.printHelp("Axwave Client", options);
 
             System.exit(1);
             return;
@@ -41,13 +39,22 @@ public class App {
 
         Integer interval = Integer.getInteger(cmd.getOptionValue('k', "2"));
         Integer packetLengthInSeconds = Integer.getInteger(cmd.getOptionValue('n', "4"));
+        String host = cmd.getOptionValue("host", "localhost");
+        Integer port = Integer.getInteger(cmd.getOptionValue("port", "1984"));
 
         try {
-            new Server(interval, packetLengthInSeconds).serve();
+            new Client(interval, packetLengthInSeconds, host, port).connectAndSend();
         } catch (IOException e) {
-            LOGGER.severe("IOException in Server");
+            LOGGER.severe("IOException in Client");
             e.printStackTrace();
         }
+    }
+
+    private static Option buildOption(String name, String description, Class<?> type) {
+        Option k = new Option(name, true, description);
+        k.setRequired(false);
+        k.setType(type);
+        return k;
     }
 
 

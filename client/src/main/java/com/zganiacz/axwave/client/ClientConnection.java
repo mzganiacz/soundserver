@@ -12,6 +12,7 @@ import java.util.logging.Logger;
 public class ClientConnection {
 
 
+    private static Logger LOGGER = Logger.getLogger(ClientConnection.class.getCanonicalName());
     private final Socket socket;
     //the queue is bounded - so in case the client isn't able to drain the queue, and it will fill up,
     //the thread that writes to it will block, and in consequence it won't read the audio stream and the buffer in data
@@ -28,30 +29,46 @@ public class ClientConnection {
     }
 
     public void sendPacket(byte[] packet) {
-        queue.add(packet);
+        try {
+            LOGGER.info("Putting packet on queue, which now has: " + queue.size() + " elements.");
+            queue.put(packet);
+        } catch (InterruptedException e) {
+            LOGGER.severe("Interrupted exception while waiting to put on the processing queue.");
+            e.printStackTrace();
+        }
     }
+
 
     private class SenderService implements Runnable {
 
-        private Logger logger = Logger.getLogger(SenderService.class.getCanonicalName());
-
         public void run() {
-            while (true) {
-                try {
+            try {
+                while (true) {
                     takeAndSend();
+                }
+            } finally {
+                try {
+                    socket.close();
                 } catch (IOException e) {
-                    logger.info("Problem with writing to socket. Packet is lost.");
-                    e.printStackTrace();
-                } catch (InterruptedException e) {
-                    logger.info("SenderService interrupted while waiting to take from queue. Packet is lost.");
+                    LOGGER.severe("Problem with closing the socket.");
                     e.printStackTrace();
                 }
             }
         }
 
-        private void takeAndSend() throws InterruptedException, IOException {
-            byte[] toSend = queue.take();
-            socket.getOutputStream().write(toSend);
+        private void takeAndSend() {
+            try {
+                LOGGER.info("Taking packet from queue, which now has: " + queue.size() + " elements.");
+                byte[] toSend = queue.take();
+                socket.getOutputStream().write(toSend);
+            } catch (IOException e) {
+                LOGGER.severe("Problem with writing to socket. Packet is lost.");
+                e.printStackTrace();
+            } catch (InterruptedException e) {
+                LOGGER.severe("SenderService interrupted while waiting to take from queue. Packet is lost.");
+                e.printStackTrace();
+            }
         }
+
     }
 }

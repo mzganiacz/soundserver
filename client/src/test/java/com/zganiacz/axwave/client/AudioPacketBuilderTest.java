@@ -8,6 +8,7 @@ import org.junit.Test;
 import javax.sound.sampled.AudioFormat;
 import javax.sound.sampled.AudioInputStream;
 import javax.sound.sampled.LineUnavailableException;
+import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
@@ -132,8 +133,8 @@ public class AudioPacketBuilderTest {
         return (short) 1;
     }
 
-    private AudioInputStream buildAudioInputStream(String streamContents, short sampleSize) {
-        return new AudioInputStream(IOUtils.toInputStream(streamContents, Charset.defaultCharset()), new AudioFormat(1F, sampleSize * 8, 1, false, false), Integer.MAX_VALUE);
+    private InputStream buildAudioInputStream(String streamContents, short sampleSize) {
+        return new BufferedInputStream(new AudioInputStream(IOUtils.toInputStream(streamContents, Charset.defaultCharset()), new AudioFormat(1F, sampleSize * 8, 1, false, false), Integer.MAX_VALUE));
     }
 
     private byte[] getExpectedHeader(short dataSize) {

@@ -3,6 +3,7 @@ package com.zganiacz.axwave.client;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
+import java.util.logging.Logger;
 
 /**
  * Created by Dynamo on 24.11.2016.
@@ -11,6 +12,7 @@ public class AudioPacketBuilder {
 
     public static final byte[] MAGIC_HEADER_PREFIX = new byte[]{0x12, 0x34};
     public static final int HEADER_LENGTH = 14;
+    private static Logger LOGGER = Logger.getLogger(AudioPacketBuilder.class.getCanonicalName());
     private final int repeatLength;
     private final int length;
     private final TimestampProvider timestampProvider;
@@ -33,6 +35,7 @@ public class AudioPacketBuilder {
     }
 
     public byte[] buildPacket(InputStream is) throws IOException {
+        LOGGER.info(String.format("Building packet. Length: %d, RepeatLength: %d", length, repeatLength));
         byte[] packet = new byte[HEADER_LENGTH + length];
         writeHeader(packet);
         if (repeatLength > 0) {

@@ -5,36 +5,41 @@ import javafx.util.Pair;
 import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
 /**
  * Created by Dynamo on 24.11.2016.
  */
-public class Server {
+public class Client {
 
 
-    private static Logger LOGGER = Logger.getLogger(Server.class.getCanonicalName());
+    private static Logger LOGGER = Logger.getLogger(Client.class.getCanonicalName());
     private final int interval;
     private final int packetLengthInSeconds;
+    private final String host;
+    private final Integer port;
 
 
-    public Server(int interval, int packetLengthInSeconds) {
+    public Client(int interval, int packetLengthInSeconds, String host, Integer port) {
         if (interval < 1 || packetLengthInSeconds < 1) {
             throw new IllegalArgumentException("Both interval and packetLengthInSeconds must equal at least 1 second");
         }
         this.interval = interval;
         this.packetLengthInSeconds = packetLengthInSeconds;
+        this.host = host;
+        this.port = port;
 
 
     }
 
-    public static Pair<AudioFormats.Format, TargetDataLine> tryLines() {
+    private static Pair<AudioFormats.Format, TargetDataLine> tryLines() {
         for (AudioFormats.Format format : AudioFormats.FORMATS.values()) {
             TargetDataLine targetDataLine = null;
             try {
                 targetDataLine = AudioSystem.getTargetDataLine(format.getAudioFormat());
+                targetDataLine.open();
+                targetDataLine.start();
                 LOGGER.info("Got line " + format.getName());
                 return new Pair<>(format, targetDataLine);
             } catch (LineUnavailableException e) {
@@ -46,33 +51,35 @@ public class Server {
 
     }
 
-    public void serve() throws IOException {
-        ServerSocket serverSocket = new ServerSocket(1984);
-        streamAudioToSocket(serverSocket.accept());
+    public void connectAndSend() throws IOException {
+        Socket clientSocket = new Socket(host, port);
+        streamAudioToSocket(clientSocket);
 
     }
 
     private void streamAudioToSocket(Socket socket) throws IOException {
+
         Pair<AudioFormats.Format, TargetDataLine> formatAndLine = tryLines();
         AudioFormats.Format format = formatAndLine.getKey();
 
 
-        AudioInputStream audioInputStream = new AudioInputStream(formatAndLine.getValue());
-        BufferedInputStream bis = new BufferedInputStream(audioInputStream);
-        bis.mark(0);
+        try (AudioInputStream audioInputStream = new AudioInputStream(formatAndLine.getValue())) {
+            BufferedInputStream bufferedInputStream = new BufferedInputStream(audioInputStream);
+            bufferedInputStream.mark(0);
 
-        int secondSize = secondSize(format.getAudioFormat());
-        int dataSize = secondSize * packetLengthInSeconds;
-        int repeatSize = secondSize * calcRepeatLengthInSeconds(interval, packetLengthInSeconds);
-        AudioPacketBuilder audioPacketBuilder = new AudioPacketBuilder(dataSize, repeatSize, format.getCode(), new TimestampProvider() {
-        });
+            int secondSize = secondSize(format.getAudioFormat());
+            int dataSize = secondSize * packetLengthInSeconds;
+            int repeatSize = secondSize * calcRepeatLengthInSeconds(interval, packetLengthInSeconds);
+            AudioPacketBuilder audioPacketBuilder = new AudioPacketBuilder(dataSize, repeatSize, format.getCode(), new TimestampProvider() {
+            });
 
-        ClientConnection cc = new ClientConnection(socket);
+            ClientConnection cc = new ClientConnection(socket);
 
-        //Pump from in input to socket output
-        while (true) {
-            byte[] packetContents = audioPacketBuilder.buildPacket(bis);
-            cc.sendPacket(packetContents);
+            //Pump from in input to socket output
+            while (true) {
+                byte[] packetContents = audioPacketBuilder.buildPacket(bufferedInputStream);
+                cc.sendPacket(packetContents);
+            }
         }
 
 
