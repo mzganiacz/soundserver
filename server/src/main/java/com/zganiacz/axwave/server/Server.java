@@ -29,7 +29,8 @@ public class Server {
 
         while (true) {
             try {
-                byte[] bytes = clientConnection.takePacket();
+                DataPacket bytes = clientConnection.takeIncomingPacket();
+
 
 
             } catch (InterruptedException e) {

@@ -1,9 +1,6 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.ByteStreamUtilities;
 import org.apache.commons.io.IOUtils;
-import org.apache.commons.lang.ArrayUtils;
-import org.junit.Before;
 import org.junit.Test;
 
 import javax.sound.sampled.AudioFormat;
@@ -13,48 +10,24 @@ import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.Charset;
-import java.util.function.LongSupplier;
 
-import static com.zganiacz.axwave.server.ClientConnection.HEADER_LENGTH;
-import static com.zganiacz.axwave.server.ClientConnection.MAGIC_HEADER_PREFIX;
 import static org.junit.Assert.*;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 /**
  * Created by Dynamo on 25.11.2016.
  */
-public class AudioPacketBuilderTest {
+public class AudioSamplesBuilderTest {
 
     private static final short TWO_BYTES_OF_DATA = 2;
     private static final short BYTE_OF_DATA = 1;
-    private final LongSupplier timestampProvider = mock(LongSupplier.class);
-    private AudioPacketBuilder tested;
 
-    @Before
-    public void before() {
-        when(timestampProvider.getAsLong()).thenReturn(System.currentTimeMillis());
-    }
+    private AudioSamplesBuilder tested;
 
-    @Test
-    public void shouldBuildHeaderInPacket() throws IOException {
-        //given
-        tested = new AudioPacketBuilder(TWO_BYTES_OF_DATA, 0, getCode(), timestampProvider);
-        InputStream bis = buildAudioInputStream("ANYTHING", TWO_BYTES_OF_DATA);
-
-        //when
-        byte[] bytes = tested.buildPacket(bis);
-
-        //then
-        byte[] expecteds = getExpectedHeader(TWO_BYTES_OF_DATA);
-        assertArrayEquals(expecteds, ArrayUtils.subarray(bytes, 0, HEADER_LENGTH));
-
-    }
 
     @Test
     public void shouldWriteNoRepeats() throws IOException {
         //given
-        tested = new AudioPacketBuilder(TWO_BYTES_OF_DATA, 0, getCode(), timestampProvider);
+        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 0);
         InputStream bis = buildAudioInputStream("AABBCC", TWO_BYTES_OF_DATA);
 
         //when, then
@@ -66,7 +39,7 @@ public class AudioPacketBuilderTest {
     @Test
     public void shouldWriteWithRepeats() throws IOException {
         //given
-        tested = new AudioPacketBuilder(TWO_BYTES_OF_DATA, BYTE_OF_DATA, getCode(), timestampProvider);
+        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, BYTE_OF_DATA);
         InputStream bis = buildAudioInputStream("AABBCC", BYTE_OF_DATA);
         bis.mark(0);
 
@@ -81,7 +54,7 @@ public class AudioPacketBuilderTest {
     @Test
     public void shouldRepeatIndefinitely() throws IOException {
         //given
-        tested = new AudioPacketBuilder(TWO_BYTES_OF_DATA, 2, getCode(), timestampProvider);
+        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 2);
         InputStream bis = buildAudioInputStream("AABBCC", TWO_BYTES_OF_DATA);
         bis.mark(0);
 
@@ -95,7 +68,7 @@ public class AudioPacketBuilderTest {
     @Test
     public void shouldGuardTheReadDataLength() throws IOException, LineUnavailableException {
         //given
-        tested = new AudioPacketBuilder(TWO_BYTES_OF_DATA, 0, getCode(), timestampProvider);
+        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 0);
         InputStream bis = buildAudioInputStream("", TWO_BYTES_OF_DATA);
         //when
         try {
@@ -117,7 +90,7 @@ public class AudioPacketBuilderTest {
 
     private void throwsOnInit(Class c, int length, int repeatLength) {
         try {
-            tested = new AudioPacketBuilder(length, repeatLength, getCode(), timestampProvider);
+            tested = new AudioSamplesBuilder(length, repeatLength);
             fail();
         } catch (Exception e) {
             if (!c.isAssignableFrom(c)) fail();
@@ -128,23 +101,14 @@ public class AudioPacketBuilderTest {
     private void shouldBuildPacketWith(InputStream bis, byte[] array2, short numOfDataBytes) throws IOException {
         byte[] bytes = tested.buildPacket(bis);
 
-        byte[] expecteds = ArrayUtils.addAll(getExpectedHeader(numOfDataBytes), array2);
-        assertArrayEquals(expecteds, bytes);
+        assertArrayEquals(array2, bytes);
     }
 
 
-    private Short getCode() {
-        return (short) 1;
-    }
 
     private InputStream buildAudioInputStream(String streamContents, short sampleSize) {
         return new BufferedInputStream(new AudioInputStream(IOUtils.toInputStream(streamContents, Charset.defaultCharset()), new AudioFormat(1F, sampleSize * 8, 1, false, false), Integer.MAX_VALUE));
     }
 
-    private byte[] getExpectedHeader(short dataSize) {
-        byte[] expecteds = ArrayUtils.addAll(MAGIC_HEADER_PREFIX, ByteStreamUtilities.toBytes((short) (10 + dataSize)));
-        expecteds = ArrayUtils.addAll(expecteds, ByteStreamUtilities.toBytes(timestampProvider.getAsLong()));
-        expecteds = ArrayUtils.addAll(expecteds, ByteStreamUtilities.toBytes(getCode()));
-        return expecteds;
-    }
+
 }

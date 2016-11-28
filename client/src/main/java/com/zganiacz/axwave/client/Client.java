@@ -1,6 +1,7 @@
 package com.zganiacz.axwave.client;
 
 import com.zganiacz.axwave.server.AudioFormats;
+import com.zganiacz.axwave.server.DataPacket;
 import javafx.util.Pair;
 
 import javax.sound.sampled.*;
@@ -59,6 +60,7 @@ public class Client {
     }
 
     private void streamAudioToSocket(Socket socket) throws IOException {
+        ServerConnection sc = new ServerConnection(socket);
 
         Pair<AudioFormats.Format, TargetDataLine> formatAndLine = tryLines();
         AudioFormats.Format format = formatAndLine.getKey();
@@ -71,14 +73,12 @@ public class Client {
             int secondSize = secondSize(format.getAudioFormat());
             int dataSize = secondSize * packetLengthInSeconds;
             int repeatSize = secondSize * calcRepeatLengthInSeconds(interval, packetLengthInSeconds);
-            AudioPacketBuilder audioPacketBuilder = new AudioPacketBuilder(dataSize, repeatSize, format.getCode(), () -> System.currentTimeMillis());
-
-            ServerConnection cc = new ServerConnection(socket);
+            AudioSamplesBuilder audioSamplesBuilder = new AudioSamplesBuilder(dataSize, repeatSize);
 
             //Pump from in input to socket output
             while (true) {
-                byte[] packetContents = audioPacketBuilder.buildPacket(bufferedInputStream);
-                cc.sendPacket(packetContents);
+                DataPacket packet = new DataPacket(System.currentTimeMillis(), formatAndLine.getKey().getCode(), audioSamplesBuilder.buildPacket(bufferedInputStream));
+                sc.sendPacket(packet);
             }
         }
 

@@ -15,6 +15,12 @@ public class ByteStreamUtilities {
         return b;
     }
 
+    public static byte[] readFour(InputStream inputStream) throws IOException {
+        byte[] b = new byte[4];
+        inputStream.read(b, 0, 4);
+        return b;
+    }
+
     public static byte[] toBytes(final short i) {
         ByteBuffer bb = ByteBuffer.allocate(2);
         bb.putShort(i);

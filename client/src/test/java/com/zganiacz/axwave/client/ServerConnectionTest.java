@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.client;
 
+import com.zganiacz.axwave.server.DataPacket;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
@@ -39,7 +40,7 @@ public class ServerConnectionTest {
         tested = new ServerConnection(socketMock);
         //when
         byte[] packet = {'0', '1', '2'};
-        tested.sendPacket(packet);
+        tested.sendPacket(new DataPacket(packet));
 
         //then
         Mockito.verify(osMock).write(eq(packet));

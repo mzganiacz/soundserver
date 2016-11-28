@@ -8,21 +8,18 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
 import java.util.logging.Logger;
 
-import static com.zganiacz.axwave.server.ByteStreamUtilities.*;
-
 /**
  * Created by Dynamo on 24.11.2016.
  */
 public class ClientConnection {
 
-    public static final byte[] MAGIC_HEADER_PREFIX = new byte[]{0x12, 0x34};
-    public static final int HEADER_LENGTH = 14;
+
 
 
     private static Logger LOGGER = Logger.getLogger(ClientConnection.class.getCanonicalName());
     private final Socket socket;
     //bounded as in client - here filling up the queue will result in back pressing the client
-    private final BlockingQueue<byte[]> queue = new ArrayBlockingQueue<byte[]>(100);
+    private final BlockingQueue<DataPacket> queue = new ArrayBlockingQueue<DataPacket>(100);
 
     public ClientConnection(Socket socket) {
         if (!socket.isConnected()) {
@@ -33,7 +30,7 @@ public class ClientConnection {
         new Thread(new ReceiverService()).start();
     }
 
-    public byte[] takePacket() throws InterruptedException {
+    public DataPacket takeIncomingPacket() throws InterruptedException {
         LOGGER.info("Taking packet from queue, which now has: " + queue.size() + " elements.");
         return queue.take();
 
@@ -65,7 +62,7 @@ public class ClientConnection {
 
             while (true) {
                 try {
-                    byte[] packet = readWholePacket(bis);
+                    DataPacket packet = DataPacket.readFrom(bis);
                     LOGGER.info("Putting packet to queue, which now has: " + queue.size() + " elements.");
                     queue.put(packet);
                 } catch (InterruptedException e) {
@@ -75,21 +72,8 @@ public class ClientConnection {
             }
         }
 
-        private byte[] readWholePacket(InputStream inputStream) throws IOException {
-            while (notAMagicHeader(inputStream)) ;
-            int toRead = readSize(inputStream);
-            byte[] packet = new byte[toRead];
-            readFullyOrThrow(inputStream, packet, 0, toRead);
-            return packet;
-        }
 
-        private short readSize(InputStream inputStream) throws IOException {
-            return toShort(readTwo(inputStream));
-        }
 
-        private boolean notAMagicHeader(InputStream inputStream) throws IOException {
-            return toShort(readTwo(inputStream)) != toShort(MAGIC_HEADER_PREFIX);
-        }
 
     }
 }
