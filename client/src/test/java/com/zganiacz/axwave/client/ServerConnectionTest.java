@@ -9,12 +9,13 @@ import org.mockito.Mockito;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.when;
 
-/**
- * Created by Dynamo on 25.11.2016.
- */
 public class ServerConnectionTest {
 
     @Rule
@@ -28,29 +29,32 @@ public class ServerConnectionTest {
         //given
         thrown.expect(IllegalArgumentException.class);
         //when
-        tested = new ServerConnection(new Socket());
+        tested = new ServerConnection(new Socket(), Executors.newSingleThreadExecutor());
 
         //then  exception
     }
 
     @Test
-    public void shouldSendPacketOverSocket() throws IOException {
+    public void shouldSendPacketOverSocket() throws IOException, InterruptedException {
         //given
         mockSocket();
-        tested = new ServerConnection(socketMock);
+        final ExecutorService executor = Executors.newSingleThreadExecutor();
+        tested = new ServerConnection(socketMock, executor);
         //when
         byte[] packet = {'0', '1', '2'};
-        tested.sendPacket(new DataPacket(packet));
+        tested.sendPacketAsync(new DataPacket(packet));
+        executor.awaitTermination(1, TimeUnit.SECONDS);
 
         //then
         Mockito.verify(osMock).write(eq(packet));
     }
 
+
     private void mockSocket() throws IOException {
         socketMock = Mockito.mock(Socket.class);
         osMock = Mockito.mock(OutputStream.class);
-        Mockito.when(socketMock.isConnected()).thenReturn(true);
-        Mockito.when(socketMock.getOutputStream()).thenReturn(osMock);
+        when(socketMock.isConnected()).thenReturn(true);
+        when(socketMock.getOutputStream()).thenReturn(osMock);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.client;
 
+import com.zganiacz.axwave.server.DataPacket;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 
@@ -16,63 +17,65 @@ import static org.junit.Assert.*;
 /**
  * Created by Dynamo on 25.11.2016.
  */
-public class AudioSamplesBuilderTest {
+public class DataPacketBuilderTest {
 
     private static final short TWO_BYTES_OF_DATA = 2;
     private static final short BYTE_OF_DATA = 1;
+    private static final int TIMESTAMP = 1234;
+    private static final short FORMAT_CODE = 1;
 
-    private AudioSamplesBuilder tested;
+    private DataPacketBuilder tested;
 
 
     @Test
     public void shouldWriteNoRepeats() throws IOException {
         //given
-        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 0);
+        tested = new DataPacketBuilder(TWO_BYTES_OF_DATA, 0);
         InputStream bis = buildAudioInputStream("AABBCC", TWO_BYTES_OF_DATA);
 
         //when, then
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'B', 'B'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'C', 'C'}, TWO_BYTES_OF_DATA);
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
+        shouldBuildPacketWith(bis, new byte[]{'B', 'B'});
+        shouldBuildPacketWith(bis, new byte[]{'C', 'C'});
     }
 
     @Test
     public void shouldWriteWithRepeats() throws IOException {
         //given
-        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, BYTE_OF_DATA);
+        tested = new DataPacketBuilder(TWO_BYTES_OF_DATA, BYTE_OF_DATA);
         InputStream bis = buildAudioInputStream("AABBCC", BYTE_OF_DATA);
         bis.mark(0);
 
         //when, then
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'A', 'B'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'B', 'B'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'B', 'C'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'C', 'C'}, TWO_BYTES_OF_DATA);
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
+        shouldBuildPacketWith(bis, new byte[]{'A', 'B'});
+        shouldBuildPacketWith(bis, new byte[]{'B', 'B'});
+        shouldBuildPacketWith(bis, new byte[]{'B', 'C'});
+        shouldBuildPacketWith(bis, new byte[]{'C', 'C'});
     }
 
     @Test
     public void shouldRepeatIndefinitely() throws IOException {
         //given
-        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 2);
+        tested = new DataPacketBuilder(TWO_BYTES_OF_DATA, 2);
         InputStream bis = buildAudioInputStream("AABBCC", TWO_BYTES_OF_DATA);
         bis.mark(0);
 
         //when, then
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
-        shouldBuildPacketWith(bis, new byte[]{'A', 'A'}, TWO_BYTES_OF_DATA);
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
+        shouldBuildPacketWith(bis, new byte[]{'A', 'A'});
     }
 
     @Test
     public void shouldGuardTheReadDataLength() throws IOException, LineUnavailableException {
         //given
-        tested = new AudioSamplesBuilder(TWO_BYTES_OF_DATA, 0);
+        tested = new DataPacketBuilder(TWO_BYTES_OF_DATA, 0);
         InputStream bis = buildAudioInputStream("", TWO_BYTES_OF_DATA);
         //when
         try {
-            tested.buildPacket(bis);
+            tested.buildPacket(bis, TIMESTAMP, FORMAT_CODE);
             fail();
         } catch (IllegalStateException ise) {
             //then exception
@@ -90,7 +93,7 @@ public class AudioSamplesBuilderTest {
 
     private void throwsOnInit(Class c, int length, int repeatLength) {
         try {
-            tested = new AudioSamplesBuilder(length, repeatLength);
+            tested = new DataPacketBuilder(length, repeatLength);
             fail();
         } catch (Exception e) {
             if (!c.isAssignableFrom(c)) fail();
@@ -98,12 +101,11 @@ public class AudioSamplesBuilderTest {
         }
     }
 
-    private void shouldBuildPacketWith(InputStream bis, byte[] array2, short numOfDataBytes) throws IOException {
-        byte[] bytes = tested.buildPacket(bis);
+    private void shouldBuildPacketWith(InputStream bis, byte[] expected) throws IOException {
+        DataPacket bytes = tested.buildPacket(bis, TIMESTAMP, FORMAT_CODE);
 
-        assertArrayEquals(array2, bytes);
+        assertArrayEquals(expected, bytes.getSamples());
     }
-
 
 
     private InputStream buildAudioInputStream(String streamContents, short sampleSize) {

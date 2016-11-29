@@ -8,7 +8,8 @@ import java.util.Arrays;
 import static com.zganiacz.axwave.server.ByteStreamUtilities.*;
 
 /**
- * Created by Dynamo on 28.11.2016.
+ * This class improves readability of the code, but with cost, because we use it we need to make copies of array instead of working on single instance.
+ * That cost is of course negligible.
  */
 public class DataPacket {
     public static final byte[] MAGIC_HEADER_PREFIX = new byte[]{0x12, 0x34};
@@ -48,6 +49,18 @@ public class DataPacket {
 
     private static boolean notAMagicHeader(byte[] maybeMagicHeader) throws IOException {
         return toShort(maybeMagicHeader) != toShort(MAGIC_HEADER_PREFIX);
+    }
+
+    public long getTimestamp() {
+        return ByteStreamUtilities.toLong(Arrays.copyOfRange(packet, 4, 12));
+    }
+
+    public short getFormatCode() {
+        return ByteStreamUtilities.toShort(new byte[]{packet[12], packet[13]});
+    }
+
+    public byte[] getSamples() {
+        return Arrays.copyOfRange(packet, HEADER_LENGTH, packet.length);
     }
 
     public byte[] getPacket() {

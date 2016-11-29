@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
+import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
 /**
@@ -21,16 +22,16 @@ public class ServerConnection {
     //line will overflow. This will protect us from OOM, but will result in clicks in sound.
     private final BlockingQueue<DataPacket> queue = new ArrayBlockingQueue<DataPacket>(100);
 
-    public ServerConnection(Socket socket) {
+    public ServerConnection(Socket socket, Executor executor) {
         if (!socket.isConnected()) {
             throw new IllegalArgumentException("Connected socket is expected");
         }
         this.socket = socket;
 
-        new Thread(new SenderService()).start();
+        executor.execute(new SenderService());
     }
 
-    public void sendPacket(DataPacket packet) {
+    public void sendPacketAsync(DataPacket packet) {
         try {
             LOGGER.info("Putting packet on queue, which now has: " + queue.size() + " elements.");
             queue.put(packet);

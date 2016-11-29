@@ -8,6 +8,7 @@ import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
@@ -60,7 +61,7 @@ public class Client {
     }
 
     private void streamAudioToSocket(Socket socket) throws IOException {
-        ServerConnection sc = new ServerConnection(socket);
+        ServerConnection sc = new ServerConnection(socket, Executors.newSingleThreadExecutor());
 
         Pair<AudioFormats.Format, TargetDataLine> formatAndLine = tryLines();
         AudioFormats.Format format = formatAndLine.getKey();
@@ -73,12 +74,12 @@ public class Client {
             int secondSize = secondSize(format.getAudioFormat());
             int dataSize = secondSize * packetLengthInSeconds;
             int repeatSize = secondSize * calcRepeatLengthInSeconds(interval, packetLengthInSeconds);
-            AudioSamplesBuilder audioSamplesBuilder = new AudioSamplesBuilder(dataSize, repeatSize);
+            DataPacketBuilder dataPacketBuilder = new DataPacketBuilder(dataSize, repeatSize);
 
             //Pump from in input to socket output
             while (true) {
-                DataPacket packet = new DataPacket(System.currentTimeMillis(), formatAndLine.getKey().getCode(), audioSamplesBuilder.buildPacket(bufferedInputStream));
-                sc.sendPacket(packet);
+                DataPacket packet = dataPacketBuilder.buildPacket(bufferedInputStream, System.currentTimeMillis(), formatAndLine.getKey().getCode());
+                sc.sendPacketAsync(packet);
             }
         }
 

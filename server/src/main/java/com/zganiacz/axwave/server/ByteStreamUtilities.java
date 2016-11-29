@@ -32,7 +32,16 @@ public class ByteStreamUtilities {
         if (coded.length != 2) throw new IllegalArgumentException("Expected two bytes");
         ByteBuffer bb = ByteBuffer.allocate(2);
         bb.put(coded);
+        bb.flip();
         return bb.getShort();
+    }
+
+    public static long toLong(byte[] coded) {
+        if (coded.length != 8) throw new IllegalArgumentException("Expected eight bytes");
+        ByteBuffer bb = ByteBuffer.allocate(8);
+        bb.put(coded);
+        bb.flip();
+        return bb.getLong();
     }
 
     public static byte[] toBytes(final long i) {
