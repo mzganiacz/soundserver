@@ -1,42 +1,43 @@
 package com.zganiacz.axwave.client;
 
+import com.zganiacz.axwave.shared.ConfirmationPacket;
 import com.zganiacz.axwave.shared.DataPacket;
 
+import java.io.BufferedInputStream;
 import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
-import java.util.concurrent.Executor;
 import java.util.logging.Logger;
 
-/**
- * Created by Dynamo on 24.11.2016.
- */
 public class ServerConnection {
 
 
     private static Logger LOGGER = Logger.getLogger(ServerConnection.class.getCanonicalName());
     private final Socket socket;
-    //the queue is bounded - so in case the client isn't able to drain the queue, and it will fill up,
+    //the sendingQueue is bounded - so in case the client isn't able to drain the sendingQueue, and it will fill up,
     //the thread that writes to it will block, and in consequence it won't read the audio stream and the buffer in data
     //line will overflow. This will protect us from OOM, but will result in clicks in sound.
-    private final BlockingQueue<DataPacket> queue = new ArrayBlockingQueue<DataPacket>(100);
+    private final BlockingQueue<DataPacket> sendingQueue = new ArrayBlockingQueue<DataPacket>(100);
 
-    public ServerConnection(Socket socket, Executor executor) {
+    public ServerConnection(Socket socket) {
         if (!socket.isConnected()) {
             throw new IllegalArgumentException("Connected socket is expected");
         }
         this.socket = socket;
 
-        executor.execute(new SenderService());
+        new Thread(new SenderService()).start();
+        new Thread(new ReceiverService()).start();
     }
 
     public void sendPacketAsync(DataPacket packet) {
         try {
-            LOGGER.info("Putting packet on queue, which now has: " + queue.size() + " elements.");
-            queue.put(packet);
+            sendingQueue.put(packet);
+            LOGGER.info("Put packet on sendingQueue, which now has: " + sendingQueue.size() + " elements.");
         } catch (InterruptedException e) {
-            LOGGER.severe("Interrupted exception while waiting to put on the processing queue.");
+            LOGGER.severe("Interrupted exception while waiting to put on the processing sendingQueue.");
             e.printStackTrace();
         }
     }
@@ -45,33 +46,37 @@ public class ServerConnection {
     private class SenderService implements Runnable {
 
         public void run() {
-            try {
+            try (OutputStream outputStream = socket.getOutputStream()) {
                 while (true) {
-                    takeAndSend();
+                    byte[] toSend = sendingQueue.take().getPacket();
+                    LOGGER.info("Took packet from sendingQueue, which now has: " + sendingQueue.size() + " elements.");
+                    outputStream.write(toSend);
                 }
-            } finally {
-                try {
-                    socket.close();
-                } catch (IOException e) {
-                    LOGGER.severe("Problem with closing the socket.");
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        private void takeAndSend() {
-            try {
-                LOGGER.info("Taking packet from queue, which now has: " + queue.size() + " elements.");
-                byte[] toSend = queue.take().getPacket();
-                socket.getOutputStream().write(toSend);
             } catch (IOException e) {
-                LOGGER.severe("Problem with writing to socket. Packet is lost.");
+                LOGGER.severe("Problem with writing to socket.");
                 e.printStackTrace();
             } catch (InterruptedException e) {
-                LOGGER.severe("SenderService interrupted while waiting to take from queue. Packet is lost.");
+                LOGGER.severe("SenderService interrupted while waiting to take from sendingQueue.");
                 e.printStackTrace();
             }
-        }
 
+        }
     }
+
+    private class ReceiverService implements Runnable {
+
+        public void run() {
+            try (InputStream inputStream = new BufferedInputStream(socket.getInputStream())) {
+                while (true) {
+                    LOGGER.info("Got confirmation on packet with timestamp " + ConfirmationPacket.readFrom(inputStream).getTimestamp());
+                }
+            } catch (IOException e) {
+                LOGGER.severe("Problem with writing to socket.");
+                e.printStackTrace();
+            }
+
+        }
+    }
+
+
 }

@@ -8,7 +8,6 @@ import javax.sound.sampled.*;
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.net.Socket;
-import java.util.concurrent.Executors;
 import java.util.logging.Logger;
 
 /**
@@ -61,7 +60,7 @@ public class Client {
     }
 
     private void streamAudioToSocket(Socket socket) throws IOException {
-        ServerConnection sc = new ServerConnection(socket, Executors.newSingleThreadExecutor());
+        ServerConnection sc = new ServerConnection(socket);
 
         Pair<AudioFormats.Format, TargetDataLine> formatAndLine = tryLines();
         AudioFormats.Format format = formatAndLine.getKey();
