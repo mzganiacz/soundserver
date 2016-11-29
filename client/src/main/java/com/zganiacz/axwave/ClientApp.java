@@ -9,9 +9,9 @@ import java.util.logging.Logger;
 /**
  * Created by Dynamo on 23.11.2016.
  */
-public class App {
+public class ClientApp {
 
-    private static Logger LOGGER = Logger.getLogger(App.class.getCanonicalName());
+    private static Logger LOGGER = Logger.getLogger(ServerApp.class.getCanonicalName());
 
     public static void main(String[] args) {
         Options options = new Options();

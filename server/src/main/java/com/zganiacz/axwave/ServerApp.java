@@ -5,17 +5,15 @@ import org.apache.commons.cli.*;
 
 import java.util.logging.Logger;
 
-/**
- * Created by Dynamo on 23.11.2016.
- */
-public class App {
+public class ServerApp {
 
-    private static Logger LOGGER = Logger.getLogger(App.class.getCanonicalName());
+    private static Logger LOGGER = Logger.getLogger(ServerApp.class.getCanonicalName());
 
     public static void main(String[] args) {
         Options options = new Options();
 
         options.addOption(buildOption("port", "port, default=1984", Integer.class));
+        options.addOption(buildOption("dir", "directory to save samples, default=./", String.class));
 
         CommandLineParser parser = new DefaultParser();
         HelpFormatter formatter = new HelpFormatter();
@@ -32,9 +30,11 @@ public class App {
         }
 
         Integer port = Integer.parseInt(cmd.getOptionValue("port", "1984"));
+        String dir = cmd.getOptionValue("dir", "./");
+
 
         try {
-            new Server(port).serve();
+            new Server(port, dir).serve();
         } catch (Exception e) {
             LOGGER.severe("Exception in Server");
             e.printStackTrace();

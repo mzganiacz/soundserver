@@ -17,10 +17,12 @@ public class Server {
 
     private static Logger LOGGER = Logger.getLogger(Server.class.getCanonicalName());
     private final Integer port;
+    private final String directory;
 
 
-    public Server(int port) {
+    public Server(int port, String directory) {
         this.port = port;
+        this.directory = directory;
 
 
     }
@@ -31,7 +33,7 @@ public class Server {
         Socket clientSocket = new ServerSocket(port).accept();
         LOGGER.info("Got connection from " + clientSocket.getInetAddress());
         ClientConnection clientConnection = new ClientConnection(clientSocket);
-        PacketDiskWriter pdw = new PacketDiskWriter(new File(Server.class.getResource("/").getFile()));
+        PacketDiskWriter pdw = new PacketDiskWriter(new File(directory));
 
 
         while (true) {

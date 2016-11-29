@@ -41,7 +41,7 @@ public class PacketDiskWriterTest {
         tested.writePacket(new DataPacket(1234, Short.valueOf("1"), audioSamples));
         //then
         byte[] read = new byte[10];
-        fileInputStream = new FileInputStream(SAMPLES_DIR.toFile().getAbsolutePath() + File.separator + "S44kHz16bitStereo" + File.separator + "1234.pcm");
+        fileInputStream = new FileInputStream(SAMPLES_DIR.toFile().getAbsolutePath() + File.separator + "S8kHz8bitMono" + File.separator + "1234.pcm");
         fileInputStream.read(read);
         assertArrayEquals(audioSamples, read);
     }
