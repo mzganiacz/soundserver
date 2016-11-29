@@ -31,7 +31,7 @@ public class App {
             return;
         }
 
-        Integer port = Integer.getInteger(cmd.getOptionValue("port", "1984"));
+        Integer port = Integer.parseInt(cmd.getOptionValue("port", "1984"));
 
         try {
             new Server(port).serve();

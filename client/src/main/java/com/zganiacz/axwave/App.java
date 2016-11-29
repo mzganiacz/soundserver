@@ -38,15 +38,15 @@ public class App {
             return;
         }
 
-        Integer interval = Integer.getInteger(cmd.getOptionValue('k', "2"));
-        Integer packetLengthInSeconds = Integer.getInteger(cmd.getOptionValue('n', "4"));
+        Integer interval = Integer.parseInt(cmd.getOptionValue('k', "2"));
+        Integer packetLengthInSeconds = Integer.parseInt(cmd.getOptionValue('n', "4"));
         String host = cmd.getOptionValue("host", "localhost");
-        Integer port = Integer.getInteger(cmd.getOptionValue("port", "1984"));
+        Integer port = Integer.parseInt(cmd.getOptionValue("port", "1984"));
 
         try {
             new Client(interval, packetLengthInSeconds, host, port).connectAndSend();
         } catch (IOException e) {
-            LOGGER.severe("IOException in Server");
+            LOGGER.severe("IOException in Client");
             e.printStackTrace();
         }
     }

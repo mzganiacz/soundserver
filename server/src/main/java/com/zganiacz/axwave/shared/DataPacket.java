@@ -22,9 +22,13 @@ public class DataPacket {
     }
 
     public DataPacket(long timestamp, short formatCode, byte[] audioSamples) {
+        Integer packetSize = new Integer(audioSamples.length + 10);
+        if (packetSize > Short.MAX_VALUE) {
+            throw new IllegalArgumentException("Sorry, but packet is too big, max packet size is " + Short.MAX_VALUE + ". Try shorter intervals");
+        }
         packet = ByteBuffer.allocate(HEADER_LENGTH + audioSamples.length).
                 put(MAGIC_HEADER_PREFIX).
-                putShort((short) (audioSamples.length + 10)).   //packetSize
+                putShort(packetSize.shortValue()).   //packetSize
                 putLong(timestamp).       //timestamp of first sample
                 putShort(formatCode).     //soundFormat
                 put(audioSamples).

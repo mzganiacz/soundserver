@@ -4,8 +4,8 @@ import com.zganiacz.axwave.shared.ConfirmationPacket;
 import com.zganiacz.axwave.shared.DataPacket;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.net.Socket;
 import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.BlockingQueue;
@@ -31,13 +31,14 @@ public class ClientConnection {
     }
 
     public DataPacket takeIncomingPacket() throws InterruptedException {
-        LOGGER.info("Taking packet from receiverQueue, which now has: " + receiverQueue.size() + " elements.");
-        return receiverQueue.take();
+        DataPacket taken = receiverQueue.take();
+        LOGGER.info("Took packet from receiverQueue, which now has: " + receiverQueue.size() + " elements.");
+        return taken;
     }
 
     public void confirmAsync(ConfirmationPacket confirmationPacket) throws InterruptedException {
-        LOGGER.info("Putting packet to confirmationQueue, which now has: " + confirmationQueue.size() + " elements.");
         confirmationQueue.put(confirmationPacket);
+        LOGGER.info("Put packet to confirmationQueue, which now has: " + confirmationQueue.size() + " elements.");
     }
 
 
@@ -66,11 +67,11 @@ public class ClientConnection {
 
         @Override
         public void run() {
-            try (BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(socket.getOutputStream())) {
+            try (OutputStream outputStream = socket.getOutputStream()) {
                 while (true) {
                     LOGGER.info("Taking packet from confirmationQueue, which now has: " + confirmationQueue.size() + " elements.");
                     ConfirmationPacket confirmationPacket = confirmationQueue.take();
-                    bufferedOutputStream.write(confirmationPacket.getPacket());
+                    outputStream.write(confirmationPacket.getPacket());
                 }
             } catch (IOException e) {
                 LOGGER.severe("IOException while working with confirmation socket.");
