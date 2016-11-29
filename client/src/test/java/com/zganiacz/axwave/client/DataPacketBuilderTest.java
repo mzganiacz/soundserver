@@ -1,6 +1,6 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.DataPacket;
+import com.zganiacz.axwave.shared.DataPacket;
 import org.apache.commons.io.IOUtils;
 import org.junit.Test;
 

@@ -1,6 +1,6 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.DataPacket;
+import com.zganiacz.axwave.shared.DataPacket;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;

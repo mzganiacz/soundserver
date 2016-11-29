@@ -1,5 +1,6 @@
 package com.zganiacz.axwave.server;
 
+import com.zganiacz.axwave.shared.DataPacket;
 import org.apache.commons.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;

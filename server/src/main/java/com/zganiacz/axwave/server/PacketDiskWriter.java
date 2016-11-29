@@ -1,5 +1,8 @@
 package com.zganiacz.axwave.server;
 
+import com.zganiacz.axwave.shared.AudioFormats;
+import com.zganiacz.axwave.shared.DataPacket;
+
 import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;

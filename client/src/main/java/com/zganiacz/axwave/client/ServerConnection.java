@@ -1,6 +1,6 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.DataPacket;
+import com.zganiacz.axwave.shared.DataPacket;
 
 import java.io.IOException;
 import java.net.Socket;

@@ -1,12 +1,12 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.DataPacket;
+import com.zganiacz.axwave.shared.DataPacket;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.util.logging.Logger;
 
-import static com.zganiacz.axwave.server.ByteStreamUtilities.readFullyOrThrow;
+import static com.zganiacz.axwave.shared.ByteStreamUtilities.readFullyOrThrow;
 
 /**
  * For skae of improving performance (a bit) it would be better if during BytePacket creation

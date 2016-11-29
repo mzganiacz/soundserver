@@ -1,5 +1,7 @@
 package com.zganiacz.axwave.server;
 
+import com.zganiacz.axwave.shared.DataPacket;
+
 import java.io.BufferedInputStream;
 import java.io.IOException;
 import java.io.InputStream;

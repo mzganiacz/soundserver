@@ -1,12 +1,14 @@
 package com.zganiacz.axwave.server;
 
+import com.zganiacz.axwave.shared.ByteStreamUtilities;
+import com.zganiacz.axwave.shared.DataPacket;
 import org.apache.commons.lang.ArrayUtils;
 import org.junit.Test;
 
 import java.io.IOException;
 
-import static com.zganiacz.axwave.server.DataPacket.HEADER_LENGTH;
-import static com.zganiacz.axwave.server.DataPacket.MAGIC_HEADER_PREFIX;
+import static com.zganiacz.axwave.shared.DataPacket.HEADER_LENGTH;
+import static com.zganiacz.axwave.shared.DataPacket.MAGIC_HEADER_PREFIX;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 

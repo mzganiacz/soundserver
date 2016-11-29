@@ -1,7 +1,7 @@
 package com.zganiacz.axwave.client;
 
-import com.zganiacz.axwave.server.AudioFormats;
-import com.zganiacz.axwave.server.DataPacket;
+import com.zganiacz.axwave.shared.AudioFormats;
+import com.zganiacz.axwave.shared.DataPacket;
 import javafx.util.Pair;
 
 import javax.sound.sampled.*;

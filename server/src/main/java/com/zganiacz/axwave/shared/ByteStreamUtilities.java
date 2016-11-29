@@ -1,19 +1,12 @@
-package com.zganiacz.axwave.server;
+package com.zganiacz.axwave.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 
-/**
- * Created by Dynamo on 25.11.2016.
- */
+
 public class ByteStreamUtilities {
 
-    public static byte[] readTwo(InputStream inputStream) throws IOException {
-        byte[] b = new byte[2];
-        inputStream.read(b, 0, 2);
-        return b;
-    }
 
     public static byte[] readFour(InputStream inputStream) throws IOException {
         byte[] b = new byte[4];

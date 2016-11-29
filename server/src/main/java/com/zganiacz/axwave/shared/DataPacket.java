@@ -1,11 +1,11 @@
-package com.zganiacz.axwave.server;
+package com.zganiacz.axwave.shared;
 
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.ByteBuffer;
 import java.util.Arrays;
 
-import static com.zganiacz.axwave.server.ByteStreamUtilities.*;
+import static com.zganiacz.axwave.shared.ByteStreamUtilities.*;
 
 /**
  * This class improves readability of the code, but with cost, because we use it we need to make copies of array instead of working on single instance.
