@@ -35,7 +35,7 @@ public class Client {
 
     }
 
-    private static Pair<AudioFormats.Format, TargetDataLine> tryLines() {
+    private static Pair<AudioFormats.Format, TargetDataLine> findAvailableAudioInputLine() {
         for (AudioFormats.Format format : AudioFormats.FORMATS.values()) {
             TargetDataLine targetDataLine = null;
             try {
@@ -62,7 +62,7 @@ public class Client {
     private void streamAudioToSocket(Socket socket) throws IOException {
         ServerConnection sc = new ServerConnection(socket);
 
-        Pair<AudioFormats.Format, TargetDataLine> formatAndLine = tryLines();
+        Pair<AudioFormats.Format, TargetDataLine> formatAndLine = findAvailableAudioInputLine();
         AudioFormats.Format format = formatAndLine.getKey();
 
 
