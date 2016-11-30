@@ -9,9 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.logging.Logger;
 
-/**
- * Created by Dynamo on 24.11.2016.
- */
 public class Server {
 
 

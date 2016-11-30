@@ -12,9 +12,6 @@ import static com.zganiacz.axwave.shared.DataPacket.MAGIC_HEADER_PREFIX;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 
-/**
- * Created by Dynamo on 28.11.2016.
- */
 public class DataPacketTest {
 
     public static final short DATA_SIZE = 10;

@@ -9,9 +9,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.concurrent.SynchronousQueue;
 
-/**
- * Created by Dynamo on 24.11.2016.
- */
 public class ClientIntegrationTest {
 
     private Client tested;

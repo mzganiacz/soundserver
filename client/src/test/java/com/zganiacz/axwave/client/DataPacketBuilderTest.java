@@ -14,9 +14,6 @@ import java.nio.charset.Charset;
 
 import static org.junit.Assert.*;
 
-/**
- * Created by Dynamo on 25.11.2016.
- */
 public class DataPacketBuilderTest {
 
     private static final short TWO_BYTES_OF_DATA = 2;

@@ -3,9 +3,6 @@ package com.zganiacz.axwave.shared;
 import javax.sound.sampled.AudioFormat;
 import java.util.LinkedHashMap;
 
-/**
- * Created by Dynamo on 25.11.2016.
- */
 public class AudioFormats {
     public static LinkedHashMap<Short, Format> FORMATS = new LinkedHashMap<Short, Format>(3);
 
